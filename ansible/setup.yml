@@ -1,0 +1,24 @@
+---
+- name: Préparer et durcir la machine (démo Pradeo)
+  hosts: local
+  become: true
+  tasks:
+    - name: Mettre à jour la liste des paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer fail2ban (protection brute-force SSH)
+      apt:
+        name: fail2ban
+        state: present
+
+    - name: S'assurer que fail2ban est démarré et actif
+      service:
+        name: fail2ban
+        state: started
+        enabled: true
+
+    - name: Installer htop (supervision ressources)
+      apt:
+        name: htop
+        state: present
