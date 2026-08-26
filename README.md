@@ -4,111 +4,121 @@ Chaîne DevOps complète construite pour ma préparation à l'entretien Pradeo (
 
 **Repos** : [GitHub](https://github.com/Omarben04/pradeo-devops-demo) (public) / [GitLab](https://gitlab.com/omar-devops/pradeo-it-demo) (privé, CI/CD)
 
+**Note** : les commandes ci-dessous affichent l'état de ressources déjà créées (pas de recréation, pour éviter les conflits de nom si elles existent déjà).
+
 ---
 
 ## 1. Application (Docker)
 
-**Ce que c'est** : une application Flask (`app/app.py`) avec deux routes (`/` et `/health`), packagée dans une image Docker via `app/Dockerfile`.
+**Ce que c'est** : une application Flask (`app/app.py`, `app/Dockerfile`) packagée en image Docker.
 
-**Comment tester** :
+**Comment vérifier/montrer** :
 ```bash
-cd app
-docker build -t pradeo-demo:1.0 .
-docker run -d -p 5000:5000 --name pradeo-demo pradeo-demo:1.0
+docker images | grep pradeo-demo
+docker ps | grep pradeo-demo
 curl http://localhost:5000
 ```
 
-**Ce que le test prouve** : l'application se construit et se lance dans un conteneur isolé, portable, indépendant de la machine hôte.
+**Ce que ça prouve** : l'image existe, le conteneur tourne, l'application répond.
 
 ---
 
 ## 2. Kubernetes (k3d / K3s)
 
-**Ce que c'est** : un cluster Kubernetes local (`k3d`), qui déploie l'application en 2 replicas (`deployment.yaml`), avec réparation automatique en cas de panne.
+**Ce que c'est** : cluster Kubernetes local, application déployée en 2 replicas (`deployment.yaml`), résilience automatique.
 
-**Comment tester** :
+**Comment vérifier/montrer** :
 ```bash
-k3d cluster create pradeo-cluster
-k3d image import pradeo-demo:1.0 -c pradeo-cluster
-kubectl apply -f deployment.yaml
+k3d cluster list
+kubectl get nodes
 kubectl get pods
+kubectl get deployment pradeo-demo
+```
 
-# Test de résilience : supprimer un pod et observer la recréation automatique
+**Test de résilience en live** (celui-là recrée volontairement, c'est le but) :
+```bash
+kubectl get pods
 kubectl delete pod <nom-du-pod-affiché-ci-dessus>
 kubectl get pods
 ```
 
-**Ce que le test prouve** : Kubernetes maintient en permanence l'état désiré (2 replicas) — si un pod tombe, il est recréé automatiquement sans intervention humaine.
+**Ce que ça prouve** : le cluster existe, les pods tournent, et un pod supprimé est automatiquement recréé.
 
 ---
 
 ## 3. Pipeline CI/CD (GitLab)
 
-**Ce que c'est** : un fichier `.gitlab-ci.yml` qui automatise le build et le test de l'application à chaque `git push` sur GitLab.
+**Ce que c'est** : `.gitlab-ci.yml`, build + test automatiques à chaque push.
 
-**Comment tester** : pousser un commit sur GitLab, puis consulter :
-`https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines`
+**Comment vérifier/montrer** :
+```bash
+cat .gitlab-ci.yml
+```
+Puis ouvrir en direct : `https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines`
 
-**Ce que le test prouve** : le code est automatiquement construit et testé sans intervention manuelle à chaque modification.
+**Ce que ça prouve** : le pipeline existe, est versionné, et son historique montre des exécutions réussies.
 
 ---
 
 ## 4. Terraform (Infrastructure as Code)
 
-**Ce que c'est** : un fichier `terraform/main.tf` qui provisionne un conteneur Docker (`pradeo-demo-terraform`) à partir de l'image applicative, en utilisant le provider Docker de Terraform.
+**Ce que c'est** : `terraform/main.tf`, provisionne un conteneur Docker via le provider Terraform.
 
-**Comment tester** :
+**Comment vérifier/montrer** :
 ```bash
 cd terraform
-terraform init
-terraform plan
-terraform apply
+cat main.tf
+terraform show
 curl http://localhost:5050
 ```
 
-**Ce que le test prouve** : l'infrastructure (ici un conteneur) est créée de façon reproductible et automatisée, à partir d'un fichier texte versionné, plutôt qu'à la main.
+**Ce que ça prouve** : la ressource décrite dans le fichier existe réellement et répond.
 
 ---
 
 ## 5. Ansible — configuration de l'environnement de travail
 
-**Ce que c'est** : un playbook (`ansible/setup.yml`) qui installe et démarre `fail2ban` (protection anti-brute-force) et `htop` (supervision) sur la machine.
+**Ce que c'est** : `ansible/setup.yml`, installe fail2ban + htop.
 
-**Comment tester** :
+**Comment vérifier/montrer** :
 ```bash
 cd ansible
-ansible-playbook -i inventory.ini setup.yml
+cat setup.yml
 sudo service fail2ban status
-
-# Relancer une seconde fois pour prouver l'idempotence (0 changement attendu)
-ansible-playbook -i inventory.ini setup.yml
+which htop
 ```
 
-**Ce que le test prouve** : Ansible vérifie l'état avant d'agir — relancé plusieurs fois, il ne modifie que ce qui n'est pas déjà en place (idempotence).
+**Idempotence en live** (celle-là relance volontairement, c'est le but) :
+```bash
+ansible-playbook -i inventory.ini setup.yml
+```
+→ observer `changed=0` (rien à refaire, tout est déjà en place).
+
+**Ce que ça prouve** : la configuration est appliquée, et Ansible ne refait rien d'inutile si tout est déjà bon.
 
 ---
 
 ## 6. Ansible — configuration directe d'un conteneur (chaîne Terraform → Ansible)
 
-**Ce que c'est** : un second playbook (`ansible/setup-container.yml`) qui se connecte **directement au conteneur créé par Terraform** (sans SSH, via une connexion Docker native) pour y installer `curl`.
+**Ce que c'est** : `ansible/setup-container.yml`, se connecte directement au conteneur créé par Terraform (sans SSH).
 
-**Comment tester** :
+**Comment vérifier/montrer** :
 ```bash
-cd ansible
-ansible-playbook -i inventory-container.ini setup-container.yml
+cat ansible/setup-container.yml
 docker exec pradeo-demo-terraform which curl
 ```
 
-**Ce que le test prouve** : un vrai enchaînement provisioning (Terraform crée) → configuration (Ansible configure), comme dans un déploiement réel d'entreprise.
+**Ce que ça prouve** : Terraform a créé le conteneur, Ansible l'a configuré ensuite, directement.
 
 ---
 
 ## 7. osquery (visibilité comportementale, base d'un EDR)
 
-**Ce que c'est** : osquery interroge l'état du système (processus, connexions réseau) via des requêtes SQL — le principe d'observation utilisé par les EDR (comme CrowdStrike, cité dans l'offre Pradeo).
+**Ce que c'est** : interroge l'état du système via SQL — principe utilisé par les EDR (CrowdStrike, cité dans l'offre Pradeo).
 
-**Comment tester** :
+**Comment vérifier/montrer** :
 ```bash
+osqueryi --version
 osqueryi
 ```
 Puis dans le shell :
@@ -118,12 +128,14 @@ SELECT pid, local_address, local_port, remote_address, remote_port, state FROM p
 ```
 Sortir avec `.exit`.
 
-**Ce que le test prouve** : la visibilité sur l'état réel du système — brique de base d'un EDR. **Limite assumée** : osquery n'alerte pas et ne bloque pas automatiquement, contrairement à un EDR complet — c'est un outil d'observation, pas de réaction automatique.
+**Ce que ça prouve** : la visibilité en temps réel sur les processus et connexions réseau.
+
+**Limite assumée** : osquery n'alerte pas et ne bloque pas automatiquement — c'est un outil d'observation, pas de réaction, contrairement à un EDR complet.
 
 ---
 
 ## Ce qui n'est pas encore fait (feuille de route)
 
 - Un vrai cloud provider (OVHcloud) pour Terraform, plutôt que le provider Docker local
-- Wazuh comme SIEM complet, pour la corrélation de logs et l'alerting (projet séparé en cours)
+- Wazuh comme SIEM complet (projet séparé en cours)
 - Un vrai serveur distant pour Ansible (actuellement en local / conteneur)
