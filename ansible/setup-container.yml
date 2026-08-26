@@ -1,0 +1,12 @@
+---
+- name: Configurer le conteneur applicatif via Ansible
+  hosts: docker_containers
+  tasks:
+    - name: Mettre à jour la liste des paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer curl (outil de diagnostic réseau)
+      apt:
+        name: curl
+        state: present
