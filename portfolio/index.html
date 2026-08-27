@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OmarOS — Omar Benmansour</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><polygon points=%2250,5 90,27 90,73 50,95 10,73 10,27%22 fill=%22%230B1120%22 stroke=%22%235EEAD4%22 stroke-width=%224%22/><text x=%2250%22 y=%2262%22 font-size=%2240%22 fill=%22%235EEAD4%22 text-anchor=%22middle%22 font-family=%22monospace%22>O</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== BOOT SCREEN ===== -->
+<div id="boot-screen">
+  <div class="boot-log" id="boot-log"></div>
+  <div class="boot-hex">
+    <svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27"/></svg>
+  </div>
+</div>
+
+<!-- ===== DESKTOP ===== -->
+<div id="desktop" class="hidden">
+
+  <!-- Top status bar -->
+  <div id="topbar">
+    <div class="topbar-left">
+      <span class="hex-logo">
+        <svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27"/></svg>
+      </span>
+      <span class="brand">OmarOS</span>
+      <span class="topbar-divider"></span>
+      <span class="menu-item" data-app="about">Système</span>
+      <span class="menu-item" data-app="projects">Projets</span>
+      <span class="menu-item" data-app="contact">Contact</span>
+    </div>
+    <div class="topbar-right">
+      <span class="status-pill"><i class="dot dot-ok"></i>SÉCURITÉ: OK</span>
+      <span class="status-pill mono" id="clock">--:--:--</span>
+    </div>
+  </div>
+
+  <!-- Windows render here -->
+  <div id="windows-layer"></div>
+
+  <!-- Dock -->
+  <div id="dock"></div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
