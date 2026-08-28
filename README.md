@@ -1,103 +1,98 @@
-# Pradeo DevOps Demo
+# Pradeo DevOps Demo — Projet complet
 
-Chaîne DevOps complète construite pour ma préparation à l'entretien Pradeo (poste Alternant Technicien IT Interne) : application dockerisée, orchestrée avec Kubernetes, provisionnée avec Terraform, configurée avec Ansible, avec pipeline CI/CD GitLab et une première approche EDR via osquery.
+Chaîne DevOps et sécurité complète, construite en préparation de l'entretien Pradeo (poste Alternant Technicien IT Interne), puis étendue sur une vraie infrastructure cloud (Oracle Cloud, Always Free) pour aller au-delà d'un simple environnement de développement.
 
 **Repos** : [GitHub](https://github.com/Omarben04/pradeo-devops-demo) (public) / [GitLab](https://gitlab.com/omar-devops/pradeo-it-demo) (privé, CI/CD)
 
-> Les commandes ci-dessous affichent l'état de ressources déjà créées (pas de recréation), pour éviter les conflits de nom si elles existent déjà.
-
 ---
 
-## Structure des fichiers du projet
+## Accès rapide — démonstration en direct
 
-pradeo-devops-demo/
-├── app/
-│ ├── app.py → code de l'application Flask
-│ ├── Dockerfile → recette de construction de l'image Docker
-│ └── requirements.txt → dépendances Python (Flask)
-├── deployment.yaml → déploiement Kubernetes (2 replicas + service)
-├── .gitlab-ci.yml → pipeline CI/CD (build + test automatiques)
-├── terraform/
-│ └── main.tf → décrit le conteneur à créer via Terraform
-├── ansible/
-│ ├── setup.yml → playbook n°1 (configure la machine locale)
-│ ├── inventory.ini → cible de setup.yml
-│ ├── setup-container.yml → playbook n°2 (configure le conteneur Terraform)
-│ └── inventory-container.ini → cible de setup-container.yml
-└── security/
-└── osquery-notes.md → notes et requêtes SQL testées avec osquery
+Ces liens sont **publics**, accessibles immédiatement depuis n'importe quel navigateur, sans configuration :
 
-
----
-
-## Ports utilisés — à quoi sert chacun
-
-| Port | Sert à | Créé par |
+| Service | Lien | Identifiants |
 |---|---|---|
-| **5000** | Accès au conteneur applicatif lancé manuellement (`pradeo-demo`) | `docker run` |
-| **5050** | Accès au conteneur applicatif créé par Terraform (`pradeo-demo-terraform`) | Terraform (`terraform apply`) |
-| **30080** | Accès à l'application via le cluster Kubernetes (via `kubectl port-forward`) | Kubernetes (Service dans `deployment.yaml`) |
-| **45225** | Port technique utilisé par k3d pour l'API interne de Kubernetes (6443) | k3d, automatiquement à la création du cluster |
+| **Portfolio** (Kubernetes, 3 replicas) | http://141.253.111.20:30081/ | — |
+| **Application demo** (pradeo-demo) | http://141.253.111.20:30080/ | — |
+| **Graylog** (SIEM) | http://89.168.55.236:9000/ | `admin` / `admin` |
+| **Grafana** (Supervision) | http://141.253.111.20:3000/ | `admin` / `pradeoGrafana2026` |
+| **Prometheus** (métriques brutes) | http://141.253.111.20:9090/ | — |
 
-**Pourquoi 3 ports différents pour la même appli** : ce sont 3 instances séparées, montrées volontairement — une lancée à la main, une créée par Terraform, une orchestrée par Kubernetes. Ça permet de comparer les 3 approches en entretien.
+## Accès de démonstration technique
+
+Pour explorer l'infrastructure elle-même (pas juste les interfaces web) :
+
+**Accès SSH sur `app-server`** (droits complets — Docker, Kubernetes, configuration) :
+```bash
+ssh amaury@141.253.111.20
+```
+(clé privée dédiée transmise séparément, par email)
+
+**Accès Oracle Cloud Console (lecture seule)** — pour consulter directement l'architecture, les VM, les règles de pare-feu :
+- Compte : `amaury.jaspar@pradeo.com`
+- Mot de passe : transmis séparément
+- Portée : lecture seule sur l'ensemble du compartiment (aucune modification possible)
+
+---
+
+## Architecture générale
+
+┌─────────────────────────────┐ ┌─────────────────────────────┐
+│ app-server (ARM) │ │ security-server (ARM) │
+│ Oracle Cloud - 1 OCPU/6GB │ │ Oracle Cloud - 2 OCPU/12GB │
+│ │ │ │
+│ • Docker │ │ • Docker │
+│ • k3d / K3s (Kubernetes) │ │ • Graylog (SIEM) │
+│ - Portfolio (3 replicas) │◄────┤ - MongoDB, OpenSearch │
+│ - pradeo-demo (2 replicas)│ │ • osquery │
+│ • Prometheus + Grafana │ │ │
+│ • node-exporter │ │ │
+│ • osquery │ │ │
+│ • rsyslog → Graylog │────►│ │
+└─────────────────────────────┘ └─────────────────────────────┘
+▲ ▲
+│ Terraform (provisioning) │ Terraform (provisioning)
+│ Ansible (SSH, configuration) │
+└──────────── Codespace (poste de contrôle) ─┘
+
+
+Les deux VM sont provisionnées sur le tier **Always Free** d'Oracle Cloud (architecture ARM Ampere), choisi pour disposer de plus de RAM gratuite qu'une instance x86_64 classique.
 
 ---
 
 ## 1. Application (Docker)
 
-**Fichiers** : `app/app.py`, `app/Dockerfile`, `app/requirements.txt`
+**Fichiers** : `app/app.py`, `app/Dockerfile`
 
-**Ce que c'est** : une application Flask avec deux routes (`/` et `/health`), packagée dans une image Docker.
+Application Flask avec routes `/` et `/health`, packagée en image Docker.
 
-**Comment vérifier/montrer** :
+**Vérifier** :
 ```bash
-docker images | grep pradeo-demo
-docker ps | grep pradeo-demo
-curl http://localhost:5000
+ssh amaury@141.253.111.20 "docker images | grep pradeo-demo && curl -s http://localhost:30080"
 ```
-
-**Ce que le résultat signifie** :
-- `docker images` → confirme que l'image existe (51.3 MB), construite depuis le Dockerfile
-- `docker ps` → confirme que le conteneur tourne (statut `Up`)
-- `curl` → l'application répond "Pradeo DevOps Demo - Omar Benmansour" : preuve que le serveur web à l'intérieur du conteneur fonctionne réellement
 
 ---
 
-## 2. Kubernetes (k3d / K3s)
+## 2. Kubernetes (k3d / K3s) — sur app-server
 
-**Fichiers** : `deployment.yaml`
+**Fichiers** : `deployment.yaml`, `deployment-portfolio.yaml`
 
-**Ce que c'est** : cluster Kubernetes local (k3d), application déployée en 2 replicas, avec réparation automatique en cas de panne.
+Deux déploiements orchestrés : `pradeo-demo` (2 replicas, avec liveness/readiness probes sur `/health`) et `portfolio-omar` (3 replicas).
 
-**Comment vérifier/montrer** :
+**Vérifier** :
 ```bash
-k3d cluster list
-kubectl get nodes
-kubectl get pods
-kubectl get deployment pradeo-demo
+ssh amaury@141.253.111.20 "kubectl get pods && kubectl get deployment"
 ```
 
-**Ce que chaque résultat signifie** :
-- `k3d cluster list` → confirme que le cluster `pradeo-cluster` existe
-- `kubectl get nodes` → statut `Ready` = le cluster est fonctionnel
-- `kubectl get pods` → doit afficher 2 pods `Running` = les 2 copies de mon appli tournent
-- `kubectl get deployment pradeo-demo` → colonne `READY 2/2` = l'état désiré correspond à l'état réel
-
-**Test de résilience en live** (celui-là recrée volontairement un pod — sert à démontrer) :
+**Test de résilience** (recrée volontairement un pod) :
 ```bash
-kubectl get pods
-kubectl delete pod <nom-du-pod-affiché-ci-dessus>
-kubectl get pods
+ssh amaury@141.253.111.20 "kubectl delete pod <nom-du-pod> && kubectl get pods"
 ```
-**Ce que ce test prouve** : après suppression, le second `kubectl get pods` doit montrer encore 2 pods, mais avec un nom différent pour celui recréé — preuve que Kubernetes a détecté la perte et corrigé automatiquement.
+→ un nouveau pod apparaît automatiquement, preuve du maintien de l'état désiré par Kubernetes.
 
-**Pour accéder à l'appli via Kubernetes (port 30080)** — nécessite un terminal séparé qui reste ouvert :
+**Probes** — Kubernetes vérifie que l'application répond réellement, pas juste que le conteneur tourne :
 ```bash
-kubectl port-forward service/pradeo-demo-service 30080:5000
-```
-Puis, dans un autre terminal :
-```bash
-curl http://localhost:30080
+ssh amaury@141.253.111.20 "kubectl describe pod <nom-du-pod> | grep -A2 Liveness"
 ```
 
 ---
@@ -106,105 +101,112 @@ curl http://localhost:30080
 
 **Fichier** : `.gitlab-ci.yml`
 
-**Ce que c'est** : automatise le build et le test de l'application à chaque `git push` sur GitLab, en 2 étapes (`build`, `test`).
-
-**Comment vérifier/montrer** :
-```bash
-cat .gitlab-ci.yml
-```
-Puis ouvrir en direct : `https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines`
-
-**Ce que la page des pipelines montre** : un historique de plusieurs exécutions, chacune correspondant à un `git push` fait pendant le développement du projet.
-- Une exécution **échouée au tout début** (blocage lié à la vérification de compte GitLab, pas au code) — bon exemple de debug réel à raconter
-- Les exécutions suivantes, **toutes passées (vert)**, correspondant à chaque nouvel ajout au projet
-
-**Ce que le résultat signifie** : un badge vert "Passed" = le code s'est construit et testé automatiquement sans erreur.
+Automatise build et test à chaque `git push`. Historique consultable sur : https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines
 
 ---
 
-## 4. Terraform (Infrastructure as Code)
+## 4. Infrastructure as Code (Terraform)
 
-**Fichier** : `terraform/main.tf`
+**Fichiers** : `terraform/main.tf` (provider Docker, environnement Codespace initial), `terraform-oracle/*.tf` (provider OCI, création réelle d'une VM Oracle Cloud)
 
-**Ce que c'est** : provisionne un conteneur Docker (port 5050) à partir de l'image applicative, via le provider Docker de Terraform.
+La VM `security-server` a été **entièrement provisionnée par Terraform** — aucune création manuelle dans la console Oracle, uniquement `terraform apply`.
 
-**Comment vérifier/montrer** :
+**Vérifier** :
 ```bash
-cd terraform
-cat main.tf
-terraform show
-curl http://localhost:5050
+cd terraform-oracle && terraform show | head -30
 ```
-
-**Ce que chaque résultat signifie** :
-- `cat main.tf` → montre la description de la ressource voulue (image + conteneur)
-- `terraform show` → montre l'état réel actuel de ce que Terraform a créé et suit
-- `curl` → confirme que le conteneur créé par Terraform répond bien
 
 ---
 
-## 5. Ansible — configuration de l'environnement de travail
+## 5. Automatisation (Ansible)
 
-**Fichiers** : `ansible/setup.yml`, `ansible/inventory.ini`
+**Fichiers** : `ansible/setup.yml` (configuration locale), `ansible/setup-container.yml` (configuration d'un conteneur via connexion Docker native), `ansible/inventory-oracle.ini` (inventaire ciblant `app-server` en SSH réel)
 
-**Ce que c'est** : installe et démarre `fail2ban` (protection anti-brute-force) et `htop` (supervision) sur la machine locale.
+Playbook exécuté à distance sur `app-server` via une vraie connexion SSH (clé privée, pas de mot de passe), pour installer `htop` et vérifier l'idempotence.
 
-**Comment vérifier/montrer** :
+**Vérifier** :
 ```bash
-cd ansible
-cat setup.yml
-sudo service fail2ban status
-which htop
+cd ansible && ansible-playbook -i inventory-oracle.ini setup-oracle.yml
 ```
-
-**Idempotence en live** :
-```bash
-ansible-playbook -i inventory.ini setup.yml
-```
-**Ce que ce test prouve** : le résultat affiche `changed=0` — Ansible a vérifié que fail2ban et htop étaient déjà présents et n'a rien refait.
+→ deuxième exécution : `changed=0`, preuve qu'Ansible ne refait rien d'inutile.
 
 ---
 
-## 6. Ansible — configuration directe d'un conteneur (chaîne Terraform → Ansible)
+## 6. SIEM (Graylog) — sur security-server
 
-**Fichiers** : `ansible/setup-container.yml`, `ansible/inventory-container.ini`
+Centralise et indexe les logs système en continu. `app-server` envoie tous ses logs (via `rsyslog`) vers Graylog sur le port 1514/UDP.
 
-**Ce que c'est** : Ansible se connecte directement au conteneur créé par Terraform (sans SSH, via une connexion Docker native) pour y installer `curl`.
+**Vérifier en direct** :
+1. Ouvrir http://89.168.55.236:9000/
+2. Se connecter (`admin` / `admin`)
+3. Menu **Search** → filtrer par `source: app-server`
+→ des centaines de vrais logs système (sessions, services) apparaissent, alimentés en continu.
 
-**Comment vérifier/montrer** :
-```bash
-cat ansible/setup-container.yml
-docker exec pradeo-demo-terraform which curl
-```
-
-**Ce que le résultat signifie** : `docker exec ... which curl` affiche le chemin de `curl` à l'intérieur du conteneur — preuve qu'Ansible a bien configuré ce conteneur précis, après que Terraform l'ait créé.
+**Pourquoi Graylog et pas Wazuh** : Wazuh (initialement prévu) ne supporte pas nativement l'architecture ARM64 (ni son script d'installation, ni ses images Docker) — l'émulation x86_64 testée sur cette VM a également échoué (`exec format error`). Graylog, conçu multi-architecture dès le départ, a été retenu comme alternative fonctionnelle et cohérente.
 
 ---
 
-## 7. osquery (visibilité comportementale, base d'un EDR)
+## 7. Supervision (Prometheus + Grafana) — sur app-server
 
-**Fichier** : `security/osquery-notes.md`
+Collecte et visualise en temps réel CPU, RAM, disque, réseau de la VM, via `node-exporter`.
 
-**Ce que c'est** : interroge l'état du système via des requêtes SQL — principe utilisé par les EDR professionnels (CrowdStrike, cité dans l'offre Pradeo).
+**Vérifier en direct** :
+1. Ouvrir http://141.253.111.20:3000/ (`admin` / `pradeoGrafana2026`)
+2. Dashboard **"Node Exporter Full"** (importé depuis grafana.com, ID 1860)
+→ métriques réelles en direct, historique consultable.
 
-**Comment vérifier/montrer** :
-```bash
-osqueryi --version
-osqueryi
-```
-Puis dans le shell osquery :
-```sql
-SELECT pid, name, cmdline FROM processes WHERE name LIKE '%docker%' LIMIT 5;
-SELECT pid, local_address, local_port, remote_address, remote_port, state FROM process_open_sockets WHERE local_port != 0 LIMIT 10;
-```
-Sortir avec `.exit`.
-
-**Limite assumée à dire clairement** : osquery observe et répond aux questions qu'on lui pose — il n'alerte pas et ne bloque pas automatiquement, contrairement à un EDR complet.
+**Pourquoi Prometheus/Grafana et pas Zabbix** : Zabbix a été tenté en premier, mais son image `zabbix-server-mysql` n'initialise pas correctement le schéma de sa base MySQL sur cette configuration (conflit entre l'entrypoint du conteneur et le script d'import SQL, cause exacte non résolue dans le temps imparti). Bascule vers Prometheus + Grafana, qui a démarré sans aucun problème dès le premier lancement.
 
 ---
 
-## Ce qui n'est pas encore fait (feuille de route)
+## 8. Visibilité comportementale (osquery — base d'un EDR)
 
-- Un vrai cloud provider (OVHcloud) pour Terraform, plutôt que le provider Docker local
-- Wazuh comme SIEM complet (projet séparé en préparation)
-- Un vrai serveur distant pour Ansible (actuellement en local / conteneur, pas de SSH utilisé)
+Installé sur **les deux VM** (`app-server` et `security-server`), interroge l'état du système via SQL.
+
+**Vérifier** :
+```bash
+ssh amaury@141.253.111.20 "osqueryi --json \"SELECT pid, name, cmdline FROM processes LIMIT 5;\""
+```
+
+**Limite assumée** : osquery observe et répond aux requêtes — il n'alerte ni ne bloque automatiquement, contrairement à un EDR complet (CrowdStrike, HarfangLab).
+
+---
+
+## Difficultés rencontrées et résolues
+
+Cette section documente les vrais problèmes techniques traités pendant le projet, avec leur diagnostic et leur résolution — la partie la plus révélatrice du travail réellement effectué.
+
+| Problème | Diagnostic | Résolution |
+|---|---|---|
+| Ansible bloqué sur "Gathering Facts" vers Oracle Cloud | Multiplexing SSH (`ControlMaster`) d'Ansible incompatible avec l'environnement Codespace | Désactivation du multiplexing, forçage de `PreferredAuthentications=publickey` |
+| k3d — port 30081 injoignable depuis l'extérieur | Le load balancer k3d n'exposait pas les ports personnalisés par défaut | Cluster recréé avec `-p "30081:30081@server:0"` explicite |
+| Graylog ne recevait aucun log malgré un test réussi en local | Règle de pare-feu système (`firewalld`) manquante sur le port 1514/UDP, distincte du pare-feu Oracle Cloud déjà ouvert | Ajout de la règle avec `firewall-cmd --add-port=1514/udp`, diagnostic confirmé avec `tcpdump` |
+| Wazuh — `exec format error` au démarrage | Wazuh ne supporte pas nativement ARM64 ; l'émulation Docker (`binfmt`) testée a également échoué | Bascule vers Graylog, multi-architecture nativement |
+| Zabbix — `users table is empty` en boucle | L'image `zabbix-server-mysql` n'importe pas automatiquement son schéma SQL initial dans cet environnement | Bascule vers Prometheus + Grafana |
+| Fleet (MDM) — `exec format error` | Même limitation ARM64 que Wazuh, aucune variante ARM disponible | Non résolu dans le temps imparti — documenté comme limite connue |
+
+---
+
+## Ce qui n'est pas fait — feuille de route
+
+- **MDM** : deux tentatives (Fleet, alternatives) bloquées par l'incompatibilité ARM64 — nécessiterait une VM x86_64 (payante sur Oracle, hors Always Free)
+- **HTTPS** : les services actuels sont exposés en HTTP simple, un reverse proxy Nginx avec certificats serait l'étape suivante logique
+- **Autoscaling Kubernetes** (HorizontalPodAutoscaler) : le projet démontre le maintien d'un nombre fixe de replicas, pas l'ajustement automatique à la charge
+
+---
+
+## Stack technique complète
+
+| Domaine | Outils |
+|---|---|
+| Conteneurisation | Docker |
+| Orchestration | Kubernetes (k3d/K3s) |
+| CI/CD | GitLab CI/CD |
+| Infrastructure as Code | Terraform (providers Docker et OCI) |
+| Configuration | Ansible (SSH réel et connexion Docker native) |
+| SIEM | Graylog |
+| Supervision | Prometheus, Grafana, node-exporter |
+| Visibilité comportementale | osquery |
+| Versioning | Git (GitHub + GitLab) |
+| Cloud | Oracle Cloud Infrastructure (Always Free, ARM) |
+| Sécurité réseau | firewalld, Oracle Security Lists, accès SSH par clé, IAM en lecture seule |
