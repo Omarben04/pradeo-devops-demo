@@ -22,9 +22,10 @@ Ces liens sont **publics**, accessibles immédiatement depuis n'importe quel nav
 
 Pour explorer l'infrastructure elle-même (pas juste les interfaces web) :
 
-**Accès SSH sur `app-server`** (droits complets — Docker, Kubernetes, configuration) :
+**Accès SSH sur les deux VM** (droits complets — Docker, Kubernetes, Graylog, configuration), même clé pour les deux :
 ```bash
-ssh amaury@141.253.111.20
+ssh amaury@141.253.111.20   # app-server (Docker, K8s, portfolio, supervision)
+ssh amaury@89.168.55.236    # security-server (Graylog SIEM)
 ```
 (clé privée dédiée transmise séparément, par email)
 
