@@ -166,17 +166,30 @@ Collecte et visualise en temps réel CPU, RAM, disque, réseau de la VM, via `no
 
 ---
 
-## 8. Visibilité comportementale (osquery — base d'un EDR)
+## 8. EDR renforcé (osquery + fail2ban) — sur les deux VM
 
-Installé sur **les deux VM**, interroge l'état du système via SQL.
+**Fichiers** : `security-configs/edr-monitor.sh`, `security-configs/fail2ban-jail.local`, `security-configs/*-notes.md`
+
+Contrairement à osquery utilisé seul (simple observation à la demande), cette brique combine deux fonctions centrales d'un EDR professionnel :
+
+**Détection continue (osquery + cron)** : un script s'exécute automatiquement chaque minute sur `app-server`, interroge les connexions réseau actives via osquery, et journalise le résultat — qui remonte ensuite automatiquement dans Graylog.
 
 **Vérifier** :
 ```bash
-ssh amaury@141.253.111.20 "osqueryi --json \"SELECT pid, name, cmdline FROM processes LIMIT 5;\""
+ssh amaury@141.253.111.20 "sudo journalctl -t edr-monitor --no-pager | tail -10"
+```
+Ou dans Graylog : `source:app-server AND edr-monitor`
+
+**Réaction automatique (fail2ban)** : détecte et bloque automatiquement les IP effectuant des tentatives de connexion SSH suspectes (mode `aggressive`, 3 tentatives en 5 minutes → bannissement 1h).
+
+**Vérifier** :
+```bash
+ssh amaury@141.253.111.20 "sudo fail2ban-client status sshd"
 ```
 
-**Limite assumée** : osquery observe et répond aux requêtes — il n'alerte ni ne bloque automatiquement, contrairement à un EDR complet.
+**Test réel effectué** : fail2ban a détecté et banni automatiquement 2 IP en conditions réelles (`110.173.190.221`, `193.111.125.167`), qui scannaient le serveur en continu.
 
+**Limite assumée** : cette combinaison reste plus simple qu'un EDR commercial complet (pas de détection comportementale avancée, pas de télémétrie centralisée multi-machines native) — mais démontre concrètement les deux piliers fondamentaux : observation continue et réaction automatique.
 ---
 
 ## Difficultés rencontrées et résolues
