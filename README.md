@@ -135,6 +135,23 @@ Centralise et indexe les logs système en continu. `app-server` envoie tous ses 
 **Pourquoi Graylog et pas Wazuh** : Wazuh ne supporte pas nativement l'architecture ARM64 (ni son script d'installation, ni ses images Docker) — l'émulation x86_64 testée sur cette VM a également échoué (`exec format error`). Graylog, conçu multi-architecture dès le départ, a été retenu comme alternative fonctionnelle.
 
 ---
+### 6bis. Alerte SIEM — détection de brute-force SSH
+
+Une alerte Graylog a été configurée pour détecter les tentatives de connexion SSH suspectes en temps réel.
+
+**Configuration** :
+- Stream dédié `SSH-Failed-Attempts`, filtrant les logs contenant `Connection closed by authenticating user`
+- Event Definition : déclenchement si plus de 5 tentatives détectées en 5 minutes (`count() >= 5`)
+- Notification HTTP envoyée à chaque déclenchement
+
+**Test réel effectué** : l'alerte s'est déclenchée en conditions réelles avec **36 tentatives détectées** en 5 minutes, provenant de plusieurs IP différentes scannant en continu le serveur (activité malveillante réelle et courante sur tout serveur exposé publiquement sur internet).
+
+**Vérifier** :
+1. Ouvrir http://89.168.55.236:9000/
+2. Menu **Alerts** → **Alerts & Events**
+3. L'historique des déclenchements est visible, avec le nombre exact de tentatives détectées à chaque fois.
+
+--- 
 
 ## 7. Supervision (Prometheus + Grafana) — sur app-server
 
@@ -172,6 +189,22 @@ ssh amaury@141.253.111.20 "osqueryi --json \"SELECT pid, name, cmdline FROM proc
 | Wazuh — `exec format error` | Pas de support ARM64 natif ; émulation Docker également en échec | Bascule vers Graylog, multi-architecture nativement |
 | Zabbix — `users table is empty` en boucle | Import du schéma SQL non fonctionnel dans cet environnement | Bascule vers Prometheus + Grafana |
 | Fleet (MDM) — `exec format error` | Même limitation ARM64 que Wazuh | Non résolu — documenté comme limite connue |
+
+---
+
+
+## Script de vérification automatique de l'infrastructure
+
+**Fichier** : `verify-infra.sh`
+
+Script qui teste 15 points critiques de l'infrastructure avant chaque démonstration : connectivité SSH, Docker, Kubernetes, accessibilité des 4 services web, santé de Graylog, accès de démonstration, et présence d'osquery sur les deux serveurs.
+
+**Utiliser** :
+```bash
+./verify-infra.sh
+```
+
+**Résultat attendu** : `15 tests reussis, 0 tests echoues`
 
 ---
 
