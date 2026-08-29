@@ -1,0 +1,9 @@
+[sshd]
+enabled = true
+port = ssh
+filter = sshd[mode=aggressive]
+logpath = /var/log/secure
+backend = polling
+maxretry = 3
+findtime = 300
+bantime = 3600
