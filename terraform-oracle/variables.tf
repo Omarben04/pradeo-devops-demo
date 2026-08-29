@@ -1,0 +1,7 @@
+variable "compartment_id" {
+  default = "ocid1.tenancy.oc1..aaaaaaaald6qarcg64ihz3cujlghusydkcdywszr7p3s6zkat4zyvqoj44aa"
+}
+
+variable "ssh_public_key" {
+  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7j8vz/IMrqiMeSKzsX98nWem8wqCpwqO77LmqKLLGa+yEc46/IAcB1U7i9rHVD5178Tz0+HCQzvjdQvLuPCsLSGnyTI404GArzHVdxlVcYBey96uvyUEue9KIX1r8OS75lsBZpVaIRamW179P2m/q/DCzGYw1ExjWGsQNyESGAVFXboVBwqHhyoIyAdxXfQGjlbCI9Up7qmnPy0LAaMwFTnR/02IM1WHgdTAFA4GUFegZ0+Ju+n2+9o1Yhgy/1ZP4bl1fVLQ62kCaM0nSzAXScccCTzaoGDqC9AvnLen24Q4tTv3Dl4iTFPSL0eqjF/9Ab3PN1Giu1hStYnqssINT"
+}

@@ -1,0 +1,9 @@
+---
+- name: Configurer la VM Oracle (app-server)
+  hosts: oracle_vm
+  become: true
+  tasks:
+    - name: Installer htop
+      dnf:
+        name: htop
+        state: present
