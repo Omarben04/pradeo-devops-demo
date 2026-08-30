@@ -1,5 +1,23 @@
 # Pradeo DevOps Demo
 
+<div align="center">
+
+![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=1F6FEB&center=true&vCenter=true&width=600&lines=Infrastructure+cloud+complète+sur+Oracle+ARM;Kubernetes+%2B+SIEM+%2B+EDR+%2B+MDM;Construit%2C+cassé%2C+réparé%2C+documenté)
+
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+[![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![Ansible](https://img.shields.io/badge/Ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)](https://www.ansible.com/)
+[![Oracle Cloud](https://img.shields.io/badge/Oracle_Cloud-F80000?style=for-the-badge&logo=oracle&logoColor=white)](https://www.oracle.com/cloud/)
+
+![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen?style=flat-square)
+![Architecture](https://img.shields.io/badge/architecture-ARM64-blue?style=flat-square)
+![License](https://img.shields.io/badge/statut-projet%20personnel%20évolutif-yellow?style=flat-square)
+
+</div>
+
+---
+
 ## Avant de commencer, un mot sur ce projet
 
 Je m'appelle Omar, je suis étudiant en Licence Télécoms & Réseaux, en préparation de mon Mastère Cybersécurité & Cloud Computing. Je ne suis pas un professionnel du DevOps ni de la cybersécurité — je suis quelqu'un qui apprend en construisant, en cassant, et en recommençant.
@@ -70,6 +88,8 @@ ssh amaury@141.253.111.20 "kubectl delete pod <nom-du-pod-portfolio> && kubectl 
 
 **Difficulté rencontrée** : au premier déploiement, le port n'était pas joignable depuis l'extérieur du cluster. J'ai découvert que k3d n'expose pas automatiquement des ports personnalisés — il faut le préciser explicitement à la création du cluster (`k3d cluster create -p "30081:30081@server:0"`). Ça m'a appris que "ça marche en local dans le conteneur" ne veut pas dire "c'est accessible de l'extérieur".
 
+![Résilience Kubernetes](kubernetes-resilience.svg)
+
 ---
 
 ## 3. Pipeline CI/CD (GitLab)
@@ -79,6 +99,8 @@ ssh amaury@141.253.111.20 "kubectl delete pod <nom-du-pod-portfolio> && kubectl 
 Build et test automatiques à chaque `git push`. Historique : https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines
 
 **Ce qui manque pour un pipeline complet** : étape de scan de sécurité automatique, push vers un registre d'images, déploiement automatique sur Kubernetes (aujourd'hui fait manuellement).
+
+![Pipeline CI/CD](pipeline-cicd.svg)
 
 ---
 
@@ -92,7 +114,7 @@ La VM `security-server` a été **entièrement créée par Terraform**, sans auc
 ```bash
 cd terraform-oracle && terraform show | head -30
 ```
-
+![Terraform vers Ansible](terraform-ansible-chain.svg)
 ---
 
 ## 5. Automatisation (Ansible)
