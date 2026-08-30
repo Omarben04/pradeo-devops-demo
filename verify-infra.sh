@@ -44,7 +44,7 @@ check "Pods portfolio en Running" $?
 
 echo ""
 echo "4. Services web (acces public)"
-curl -s -o /dev/null -w "" --max-time 5 http://$APP_SERVER:30081/
+curl -s -o /dev/null --max-time 5 http://$APP_SERVER:30081/
 check "Portfolio (30081)" $?
 curl -s -o /dev/null --max-time 5 http://$SEC_SERVER:9000/
 check "Graylog (9000)" $?
@@ -52,6 +52,10 @@ curl -s -o /dev/null --max-time 5 http://$APP_SERVER:3000/
 check "Grafana (3000)" $?
 curl -s -o /dev/null --max-time 5 http://$APP_SERVER:9090/
 check "Prometheus (9090)" $?
+curl -s -o /dev/null --max-time 5 http://$SEC_SERVER/glpi/
+check "GLPI (80/glpi)" $?
+curl -s -o /dev/null --max-time 5 http://$SEC_SERVER:8082/
+check "Headwind MDM (8082)" $?
 
 echo ""
 echo "5. Graylog - reception de logs"
@@ -71,6 +75,33 @@ ssh -i "$KEY" -o ConnectTimeout=5 opc@$APP_SERVER "which osqueryi > /dev/null" 2
 check "osquery installe sur app-server" $?
 ssh -i "$KEY" -o ConnectTimeout=5 opc@$SEC_SERVER "which osqueryi > /dev/null" 2>/dev/null
 check "osquery installe sur security-server" $?
+
+echo ""
+echo "8. fail2ban (EDR - reaction automatique)"
+ssh -i "$KEY" -o ConnectTimeout=5 opc@$APP_SERVER "sudo systemctl is-active fail2ban | grep -q active" 2>/dev/null
+check "fail2ban actif sur app-server" $?
+
+echo ""
+echo "9. GLPI"
+ssh -i "$KEY" -o ConnectTimeout=5 opc@$SEC_SERVER "sudo systemctl is-active httpd | grep -q active" 2>/dev/null
+check "Apache (GLPI) actif" $?
+ssh -i "$KEY" -o ConnectTimeout=5 opc@$SEC_SERVER "sudo systemctl is-active mariadb | grep -q active" 2>/dev/null
+check "MariaDB (GLPI) actif" $?
+
+echo ""
+echo "10. Headwind MDM"
+ssh -i "$KEY" -o ConnectTimeout=5 opc@$SEC_SERVER "docker ps | grep hmdm-docker-hmdm | grep -q Up" 2>/dev/null
+check "Conteneur Headwind MDM actif" $?
+ssh -i "$KEY" -o ConnectTimeout=5 opc@$SEC_SERVER "docker ps | grep hmdm-docker-postgresql | grep -q Up" 2>/dev/null
+check "PostgreSQL (MDM) actif" $?
+
+echo ""
+echo "11. Terraform (verification locale)"
+if [ -f "/workspaces/pradeo-devops-demo/terraform-oracle/main.tf" ]; then
+  check "Fichiers Terraform Oracle presents" 0
+else
+  check "Fichiers Terraform Oracle presents" 1
+fi
 
 echo ""
 echo "================================================"
