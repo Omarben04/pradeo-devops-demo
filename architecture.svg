@@ -1,0 +1,40 @@
+<svg width="680" height="550" viewBox="0 0 680 550" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Architecture du projet Pradeo DevOps Demo</title>
+<desc>Deux VM Oracle Cloud ARM : app-server avec Kubernetes, supervision et EDR ; security-server avec SIEM, gestion de parc et MDM.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="550" fill="#0d1117"/>
+<path d="M185 76 L185 56 L495 56 L495 76" fill="none" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<text x="340" y="46" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">rsyslog — envoi des logs</text>
+<rect x="40" y="76" width="290" height="330" rx="20" fill="#0c2d48" stroke="#1f6feb" stroke-width="1"/>
+<text x="185" y="104" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="600" fill="#79c0ff">app-server</text>
+<text x="185" y="122" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#79c0ff">ARM · 1 OCPU / 6 Go</text>
+<rect x="60" y="141" width="250" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="185" y="165" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Kubernetes</text>
+<text x="185" y="183" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">Portfolio × 3 replicas</text>
+<rect x="60" y="215" width="250" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="185" y="239" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Supervision</text>
+<text x="185" y="257" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">Prometheus + Grafana</text>
+<rect x="60" y="289" width="250" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="185" y="313" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">EDR</text>
+<text x="185" y="331" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">osquery + fail2ban</text>
+<rect x="350" y="76" width="290" height="330" rx="20" fill="#3d1f0f" stroke="#d05538" stroke-width="1"/>
+<text x="495" y="104" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="600" fill="#f0997b">security-server</text>
+<text x="495" y="122" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#f0997b">ARM · 2 OCPU / 12 Go</text>
+<rect x="370" y="141" width="250" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="495" y="165" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">SIEM</text>
+<text x="495" y="183" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">Graylog + MongoDB</text>
+<rect x="370" y="215" width="250" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="495" y="239" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Gestion de parc</text>
+<text x="495" y="257" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">GLPI (installation native)</text>
+<rect x="370" y="289" width="250" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="495" y="313" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">MDM</text>
+<text x="495" y="331" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">Headwind (build ARM64)</text>
+<line x1="290" y1="450" x2="185" y2="406" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<line x1="390" y1="450" x2="495" y2="406" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<text x="340" y="432" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">Terraform + Ansible</text>
+<rect x="250" y="450" width="180" height="56" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="340" y="472" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Codespace</text>
+<text x="340" y="490" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">Poste de contrôle</text>
+</svg>

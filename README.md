@@ -29,22 +29,7 @@ Ce que je peux dire honnêtement : chaque brique de ce README a été **construi
 
 ## Architecture générale
 
-┌──────────────────────────────┐ ┌──────────────────────────────┐
-│ app-server (ARM) │ │ security-server (ARM) │
-│ Oracle Cloud - 1 OCPU/6GB │ │ Oracle Cloud - 2 OCPU/12GB │
-│ │ │ │
-│ • Docker │ │ • Docker │
-│ • k3d / K3s (Kubernetes) │ │ • Graylog (SIEM) │
-│ - Portfolio (3 replicas) │◄────┤ - MongoDB, OpenSearch │
-│ • Prometheus + Grafana │ │ • GLPI (natif PHP/Apache/ │
-│ • node-exporter │ │ MariaDB) │
-│ • osquery + fail2ban (EDR) │ │ • Headwind MDM (natif build │
-│ • rsyslog → Graylog │────►│ Docker ARM64, PostgreSQL) │
-└──────────────────────────────┘ └──────────────────────────────┘
-▲ ▲
-│ Terraform (provisioning) │ Terraform (provisioning)
-│ Ansible (SSH, configuration) │
-└───────────── Codespace (poste de contrôle) ─┘
+![Architecture du projet](architecture.svg)
 
 
 Les deux VM sont sur le tier **Always Free** d'Oracle Cloud (architecture ARM Ampere) — un choix qui m'a coûté du temps (voir les difficultés ARM64 plus bas), mais qui reste 100% gratuit en permanence.
