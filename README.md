@@ -14,6 +14,7 @@ Chaîne DevOps et sécurité complète, construite en préparation de l'entretie
 | **Graylog** (SIEM) | http://89.168.55.236:9000/ | `admin` / `admin` |
 | **Grafana** (Supervision) | http://141.253.111.20:3000/ | `admin` / `pradeoGrafana2026` |
 | **Prometheus** (métriques brutes) | http://141.253.111.20:9090/ | — |
+| **GLPI** (Gestion de parc + Tickets) | http://89.168.55.236/glpi/ | `glpi` / `glpi` |
 
 ## Accès de démonstration technique
 
@@ -190,6 +191,29 @@ ssh amaury@141.253.111.20 "sudo fail2ban-client status sshd"
 **Test réel effectué** : fail2ban a détecté et banni automatiquement 2 IP en conditions réelles (`110.173.190.221`, `193.111.125.167`), qui scannaient le serveur en continu.
 
 **Limite assumée** : cette combinaison reste plus simple qu'un EDR commercial complet (pas de détection comportementale avancée, pas de télémétrie centralisée multi-machines native) — mais démontre concrètement les deux piliers fondamentaux : observation continue et réaction automatique.
+---
+
+
+## 9. Gestion de parc et ticketing (GLPI) — sur security-server
+
+Installation native (PHP/Apache/MariaDB, sans conteneur Docker — l'image Docker officielle GLPI ne supporte pas ARM64) pour la gestion de parc informatique et le support utilisateurs, en réponse directe aux missions "support des utilisateurs internes" et "gestion du parc informatique" de l'offre.
+
+**Fichiers** : installation native, non versionnée (base de données et fichiers applicatifs sur le serveur)
+
+**Fonctionnalités testées** :
+- Inventaire de parc : les deux VM (`app-server`, `security-server`) enregistrées comme équipements
+- Module Assistance (tickets) : circuit de ticketing fonctionnel
+
+**Vérifier en direct** :
+1. Ouvrir http://89.168.55.236/glpi/
+2. Se connecter (`glpi` / `glpi`)
+3. Menu **Parc** → **Ordinateurs** : les deux serveurs y sont enregistrés
+4. Menu **Assistance** → **Tickets** : ticket de démonstration consultable
+
+**Difficulté rencontrée** : l'image Docker officielle GLPI (`diouxx/glpi`) ne supporte que `linux/amd64`. Installation native réalisée à la place (PHP 8.0, Apache, MariaDB), avec un blocage secondaire lié à SELinux (erreur 403) résolu via `semanage fcontext` et `restorecon`.
+
+**Limite assumée** : mot de passe par défaut (`glpi`/`glpi`) conservé pour la durée de la démonstration — à changer avant tout usage prolongé.
+
 ---
 
 ## Difficultés rencontrées et résolues
