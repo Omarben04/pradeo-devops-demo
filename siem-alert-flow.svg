@@ -1,0 +1,27 @@
+<svg width="680" height="564" viewBox="0 0 680 564" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>Alerte SIEM detection brute-force SSH</title>
+<desc>Les logs SSH sont filtres, un seuil declenche un evenement puis une notification.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+</defs>
+<rect width="680" height="564" fill="#0d1117"/>
+<rect x="40" y="60" width="600" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="340" y="84" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Logs SSH entrants</text>
+<text x="340" y="102" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">reçus en continu dans Graylog</text>
+<line x1="340" y1="124" x2="340" y2="160" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<rect x="40" y="160" width="600" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="340" y="184" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Stream SSH-Failed-Attempts</text>
+<text x="340" y="202" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">filtre les tentatives échouées</text>
+<line x1="340" y1="224" x2="340" y2="260" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<rect x="40" y="260" width="600" height="64" rx="10" fill="#0c2d48" stroke="#1f6feb" stroke-width="1"/>
+<text x="340" y="284" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#79c0ff">Seuil dépassé ?</text>
+<text x="340" y="302" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#79c0ff">plus de 5 tentatives en 5 minutes</text>
+<line x1="340" y1="324" x2="340" y2="360" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<rect x="40" y="360" width="600" height="64" rx="10" fill="#3d1f0f" stroke="#d05538" stroke-width="1"/>
+<text x="340" y="384" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#f0997b">Événement créé</text>
+<text x="340" y="402" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#f0997b">testé en réel : 36 tentatives détectées</text>
+<line x1="340" y1="424" x2="340" y2="460" stroke="#8b949e" stroke-width="1" marker-end="url(#arrow)"/>
+<rect x="40" y="460" width="600" height="64" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+<text x="340" y="484" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Notification HTTP</text>
+<text x="340" y="502" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#8b949e">envoyée à chaque déclenchement</text>
+</svg>

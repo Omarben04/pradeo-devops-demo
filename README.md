@@ -9,6 +9,10 @@
 [![Terraform](https://img.shields.io/badge/Terraform-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![Ansible](https://img.shields.io/badge/Ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)](https://www.ansible.com/)
 [![Oracle Cloud](https://img.shields.io/badge/Oracle_Cloud-F80000?style=for-the-badge&logo=oracle&logoColor=white)](https://www.oracle.com/cloud/)
+[![Graylog](https://img.shields.io/badge/Graylog-1D9E75?style=for-the-badge&logo=graylog&logoColor=white)](https://graylog.org/)
+[![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com/)
+[![GLPI](https://img.shields.io/badge/GLPI-378ADD?style=for-the-badge&logoColor=white)](https://glpi-project.org/)
+[![MDM](https://img.shields.io/badge/Headwind_MDM-D85A30?style=for-the-badge&logoColor=white)](https://h-mdm.com/)
 
 ![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen?style=flat-square)
 ![Architecture](https://img.shields.io/badge/architecture-ARM64-blue?style=flat-square)
@@ -152,6 +156,7 @@ J'ai poussé un peu plus loin en configurant une vraie alerte : un stream Graylo
 
 **Vérifier** : Menu **Alerts** → **Alerts & Events** dans Graylog.
 
+![Alerte SIEM](siem-alert-flow.svg)
 ---
 
 ## 7. Supervision (Prometheus + Grafana) — sur app-server
@@ -183,6 +188,7 @@ ssh amaury@141.253.111.20 "sudo fail2ban-client status sshd"
 
 **Limite assumée** : cette combinaison reste plus simple qu'un EDR commercial complet, mais elle démontre concrètement les deux piliers d'un EDR : observer, puis agir.
 
+![Flux EDR](edr-flow.svg)
 ---
 
 ## 9. Gestion de parc et ticketing (GLPI) — sur security-server
