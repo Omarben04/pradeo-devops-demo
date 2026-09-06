@@ -20,6 +20,7 @@
 
 </div>
 
+J'ai aussi construit un [guide complet de troubleshooting IT](https://github.com/Omarben04/it-troubleshooting-guide), qui rassemble les pannes que j'ai rencontrées ou observées, avec la méthode de diagnostic — plutôt orienté "comment réagir face à un incident", en complément de ce projet-ci qui est plutôt orienté "comment construire une infrastructure".
 ---
 
 ## Avant de commencer, un mot sur ce projet
