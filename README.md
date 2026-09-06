@@ -263,6 +263,12 @@ Je considère ce projet comme une base solide, pas un point d'arrivée. Chaque l
 
 ---
 
+## Documentation complémentaire
+
+- [**ADR — Architecture Decision Records**](docs/decisions.md) : le détail des principales décisions techniques prises pendant le projet, avec le contexte, les options considérées et les conséquences assumées.
+
+---
+
 ## Stack technique complète
 
 | Domaine | Outils |
