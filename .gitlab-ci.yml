@@ -47,3 +47,12 @@ trivy-scan:
   allow_failure: true
   only:
     - main
+
+gitleaks-scan:
+  stage: security
+  image: zricethezav/gitleaks:latest
+  script:
+    - gitleaks detect --source . --verbose --exit-code 0
+  allow_failure: true
+  only:
+    - main
