@@ -1,8 +1,8 @@
-# Pradeo DevOps Demo
+# 🛡️ Pradeo — Projet DevSecOps
 
 <div align="center">
 
-![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=1F6FEB&center=true&vCenter=true&width=600&lines=Infrastructure+cloud+complète+sur+Oracle+ARM;Kubernetes+%2B+SIEM+%2B+EDR+%2B+MDM;Construit%2C+cassé%2C+réparé%2C+documenté)
+![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=1F6FEB&center=true&vCenter=true&width=600&lines=Infrastructure+cloud+complète+sur+Oracle+ARM;Kubernetes+%2B+SIEM+%2B+EDR+%2B+MDM;De+DevOps+à+DevSecOps%2C+étape+par+étape;Construit%2C+cassé%2C+réparé%2C+documenté)
 
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
@@ -13,21 +13,25 @@
 [![Grafana](https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com/)
 [![GLPI](https://img.shields.io/badge/GLPI-378ADD?style=for-the-badge&logoColor=white)](https://glpi-project.org/)
 [![MDM](https://img.shields.io/badge/Headwind_MDM-D85A30?style=for-the-badge&logoColor=white)](https://h-mdm.com/)
+[![Vault](https://img.shields.io/badge/HashiCorp_Vault-000000?style=for-the-badge&logo=vault&logoColor=white)](https://www.vaultproject.io/)
+[![HTTPS](https://img.shields.io/badge/HTTPS-Let's_Encrypt-003A70?style=for-the-badge&logo=letsencrypt&logoColor=white)](https://letsencrypt.org/)
 
 ![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen?style=flat-square)
 ![Architecture](https://img.shields.io/badge/architecture-ARM64-blue?style=flat-square)
+![DevSecOps](https://img.shields.io/badge/DevSecOps-5%2F7%20briques-blueviolet?style=flat-square)
 ![License](https://img.shields.io/badge/statut-projet%20personnel%20évolutif-yellow?style=flat-square)
 
 </div>
 
 J'ai aussi construit un [guide complet de troubleshooting IT](https://github.com/Omarben04/it-troubleshooting-guide), qui rassemble les pannes que j'ai rencontrées ou observées, avec la méthode de diagnostic — plutôt orienté "comment réagir face à un incident", en complément de ce projet-ci qui est plutôt orienté "comment construire une infrastructure".
+
 ---
 
 ## Avant de commencer, un mot sur ce projet
 
 Je m'appelle Omar, je suis étudiant en Licence Télécoms & Réseaux, en préparation de mon Mastère Cybersécurité & Cloud Computing. Je ne suis pas un professionnel du DevOps ni de la cybersécurité — je suis quelqu'un qui apprend en construisant, en cassant, et en recommençant.
 
-Ce projet a démarré comme préparation à un entretien, puis j'ai continué à le faire évoluer parce que ça m'intéressait vraiment de pousser plus loin. Il n'est **pas parfait ni terminé** : certaines parties sont solides et testées en conditions réelles, d'autres sont volontairement simplifiées, et il reste beaucoup à faire pour le rendre plus fiable et plus sécurisé (voir la section dédiée en bas).
+Ce projet a démarré comme préparation à un entretien, puis j'ai continué à le faire évoluer parce que ça m'intéressait vraiment de pousser plus loin — jusqu'à transformer progressivement une infrastructure DevOps classique en une vraie démarche DevSecOps. Il n'est **pas parfait ni terminé** : certaines parties sont solides et testées en conditions réelles, d'autres sont volontairement simplifiées, et il reste des choses à faire pour le rendre encore plus complet (voir la section dédiée en bas).
 
 Ce que je peux dire honnêtement : chaque brique de ce README a été **construite pas à pas, testée, et pour beaucoup, cassée puis réparée** — pas copiée-collée sans comprendre. Les difficultés rencontrées et leur résolution sont documentées volontairement en détail, parce que c'est souvent ça qui montre le mieux ce qu'on sait vraiment faire.
 
@@ -39,12 +43,13 @@ Ce que je peux dire honnêtement : chaque brique de ce README a été **construi
 
 | Service | Lien |
 |---|---|
-| **Portfolio** (application de référence, Kubernetes, 3 replicas) | http://141.253.111.20:30081/ |
+| **Portfolio** (application de référence, Kubernetes, 3 replicas, HTTPS) | https://pradeo0projet0portfolio.duckdns.org/ |
 | **Graylog** (SIEM) | http://89.168.55.236:9000/ |
 | **Grafana** (Supervision) | http://141.253.111.20:3000/ |
 | **Prometheus** (métriques brutes) | http://141.253.111.20:9090/ |
 | **GLPI** (Gestion de parc + Tickets) | http://89.168.55.236/glpi/ |
 | **Headwind MDM** | http://89.168.55.236:8082/ |
+| **Vault** (Gestion des secrets) | http://89.168.55.236:8200/ |
 
 **Les identifiants ne sont volontairement pas publiés dans ce README** — ne jamais laisser de secrets en clair dans un dépôt Git, même sur un projet de démonstration. Pour les obtenir, ainsi que l'accès SSH aux serveurs ou la console Oracle Cloud (lecture seule) : me contacter directement (omarbenmansour2004@gmail.com), je transmets un lien sécurisé à usage unique, qui expire après la première consultation.
 
@@ -54,8 +59,9 @@ Ce que je peux dire honnêtement : chaque brique de ce README a été **construi
 
 ![Architecture du projet](architecture.svg)
 
-
 Les deux VM sont sur le tier **Always Free** d'Oracle Cloud (architecture ARM Ampere) — un choix qui m'a coûté du temps (voir les difficultés ARM64 plus bas), mais qui reste 100% gratuit en permanence.
+
+**Mise à jour depuis ce schéma** : un reverse proxy **Nginx** a depuis été ajouté sur `app-server`, devant le portfolio, avec un vrai certificat HTTPS (voir la section DevSecOps plus bas) — l'accès public passe désormais par ce proxy plutôt que directement par le port Kubernetes.
 
 **Point honnête** : les deux VM communiquent aujourd'hui via leurs adresses IP publiques, par simplicité — pas via le réseau privé interne (VCN), ce qui serait plus propre. Pas de bastion, pas de sous-réseaux séparés. Voir la feuille de route en bas.
 
@@ -101,9 +107,9 @@ ssh amaury@141.253.111.20 "kubectl delete pod <nom-du-pod-portfolio> && kubectl 
 
 **Fichier** : `.gitlab-ci.yml`
 
-Build et test automatiques à chaque `git push`. Historique : https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines
+Build, test, puis deux scans de sécurité automatiques à chaque `git push`. Historique : https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines
 
-**Ce qui manque pour un pipeline complet** : étape de scan de sécurité automatique, push vers un registre d'images, déploiement automatique sur Kubernetes (aujourd'hui fait manuellement).
+Le détail complet des étapes de sécurité (Trivy, Gitleaks) est documenté dans la section **[De DevOps à DevSecOps](#de-devops-à-devsecops)** plus bas.
 
 ![Pipeline CI/CD](pipeline-cicd.svg)
 
@@ -119,7 +125,9 @@ La VM `security-server` a été **entièrement créée par Terraform**, sans auc
 ```bash
 cd terraform-oracle && terraform show | head -30
 ```
+
 ![Terraform vers Ansible](terraform-ansible-chain.svg)
+
 ---
 
 ## 5. Automatisation (Ansible)
@@ -158,6 +166,7 @@ J'ai poussé un peu plus loin en configurant une vraie alerte : un stream Graylo
 **Vérifier** : Menu **Alerts** → **Alerts & Events** dans Graylog.
 
 ![Alerte SIEM](siem-alert-flow.svg)
+
 ---
 
 ## 7. Supervision (Prometheus + Grafana) — sur app-server
@@ -178,7 +187,7 @@ Plutôt que de me contenter d'osquery seul (qui ne fait qu'observer), j'ai voulu
 
 **Réaction automatique (fail2ban)** : détecte et bloque les IP qui scannent le serveur en SSH.
 
-**Test réel effectué** : fail2ban a détecté et banni automatiquement 2 IP (`110.173.190.221`, `193.111.125.167`) qui scannaient en continu mon serveur.
+**Test réel effectué** : fail2ban a détecté et banni automatiquement plus de 90 IP qui scannaient en continu mon serveur.
 
 **Difficulté rencontrée, et ce qu'elle m'a appris** : la première tentative d'installation de fail2ban avait déjà échoué plus tôt dans le projet. Cette fois, en l'installant directement et en activant le dépôt EPEL correctement, ça a fonctionné — mais fail2ban ne bannissait toujours rien, alors que les logs montraient clairement des dizaines de tentatives suspectes. En testant le filtre avec `fail2ban-regex`, j'ai découvert que le filtre standard classait ces tentatives précises comme "non malveillantes" par défaut — trop permissif pour mon cas. Le mode `aggressive` du filtre a résolu le problème.
 
@@ -190,6 +199,7 @@ ssh amaury@141.253.111.20 "sudo fail2ban-client status sshd"
 **Limite assumée** : cette combinaison reste plus simple qu'un EDR commercial complet, mais elle démontre concrètement les deux piliers d'un EDR : observer, puis agir.
 
 ![Flux EDR](edr-flow.svg)
+
 ---
 
 ## 9. Gestion de parc et ticketing (GLPI) — sur security-server
@@ -229,14 +239,6 @@ Face à ce troisième échec, plutôt que d'abandonner, j'ai cherché à compren
 
 ---
 
-## Scan de sécurité — Trivy (test manuel)
-
-Scan de l'image applicative avec Trivy : **19 vulnérabilités détectées** initialement (paquets système non à jour), réduites à **16** après ajout d'un `apt upgrade` dans le Dockerfile. Les vulnérabilités restantes concernent des paquets Debian sans correctif encore publié — vérifié via le statut `affected` sans `Fixed Version` dans le rapport Trivy.
-
-**Limite assumée** : ce scan a été fait manuellement, une fois — il n'est pas encore intégré comme étape automatique du pipeline CI/CD.
-
----
-
 ## Script de vérification automatique de l'infrastructure
 
 **Fichier** : `verify-infra.sh`
@@ -248,17 +250,113 @@ Après avoir enchaîné plusieurs pannes et redémarrages en cours de route, j'a
 ./verify-infra.sh
 ```
 
+**Résultat attendu** : `23 tests reussis, 0 tests echoues`
+
+---
+
+## De DevOps à DevSecOps
+
+Après avoir construit l'infrastructure, j'ai voulu comprendre concrètement ce qui distingue DevOps de DevSecOps — pas juste en le lisant, mais en le construisant brique par brique, avec de vrais résultats mesurables avant/après.
+
+![Pipeline DevSecOps](devsecops-pipeline.svg)
+
+### 1. Scan de sécurité automatique (Trivy) — intégré au pipeline CI/CD
+
+Trivy s'exécute désormais **automatiquement à chaque `git push`**, comme étape du pipeline GitLab, plutôt qu'en scan manuel ponctuel comme au tout début du projet.
+
+**Résultat réel, avant/après** : 7 vulnérabilités HIGH détectées initialement sur l'image portfolio (bibliothèque `libuuid`, Alpine 3.24.1) → **0 vulnérabilité** après ajout d'un `apk upgrade` dans le Dockerfile, confirmé automatiquement par le pipeline suivant.
+
+**Tester** :
+```bash
+# Voir le résultat dans GitLab
+# https://gitlab.com/omar-devops/pradeo-it-demo/-/pipelines → étape "trivy-scan"
+
+# Ou reproduire localement
+cd portfolio && docker build -t portfolio-test . && trivy image --severity HIGH,CRITICAL portfolio-test
+```
+
+**Difficulté rencontrée** : la première tentative utilisait l'image Docker officielle `aquasec/trivy` comme image principale du job, mais son `ENTRYPOINT` est déjà fixé sur la commande `trivy` — l'exécution du script GitLab échouait avec `unknown command "sh" for "trivy"`. Résolu en utilisant l'image `docker:24` standard et en installant Trivy comme outil supplémentaire, plutôt que de l'utiliser comme image de base.
+
+### 2. Détection de secrets (Gitleaks) — intégrée au pipeline
+
+Scanne tout l'historique Git à chaque push, à la recherche de mots de passe ou clés accidentellement committés.
+
+**Résultat réel** : 20 commits scannés, `no leaks found`.
+
+**Tester** :
+```bash
+# Voir le résultat dans GitLab, étape "gitleaks-scan"
+
+# Ou reproduire localement
+gitleaks detect --source . --verbose
+```
+
+**Même difficulté rencontrée et résolue que pour Trivy** : l'image officielle `zricethezav/gitleaks` a le même conflit d'`ENTRYPOINT` — corrigé en installant Gitleaks sur une image Alpine générique.
+
+### 3. Gestion centralisée des secrets (HashiCorp Vault)
+
+![Centralisation Vault](vault-secrets.svg)
+
+Installé sur `security-server`, centralise tous les mots de passe du projet (Graylog, Grafana, GLPI, Headwind MDM, bases de données), ainsi que les identifiants transmis pour la démonstration (accès Oracle Cloud, clé SSH).
+
+**Tester** :
+```bash
+# Interface web
+# http://89.168.55.236:8200 (token transmis séparément)
+
+# Ou en ligne de commande, une fois connecté à security-server
+docker exec -e VAULT_ADDR=http://127.0.0.1:8200 -e VAULT_TOKEN=<token> vault vault kv get secret/pradeo-project
+```
+
+**Limite assumée** : Vault tourne en **mode développement** (simple pour une démo, non scellé, pas adapté à une vraie production) — un déploiement réel nécessiterait un mode "production" avec dé-scellement manuel et stockage persistant chiffré.
+
+### 4. HTTPS réel (Nginx + Let's Encrypt)
+
+![Chaîne HTTPS](https-chain.svg)
+
+Le portfolio est accessible en HTTPS avec un vrai certificat, via un reverse proxy Nginx et un nom de domaine gratuit — plus de HTTP simple ni de certificat auto-signé avec avertissement.
+
+**Tester** :
+```bash
+curl -I https://pradeo0projet0portfolio.duckdns.org
+# Doit renvoyer 200, sans avertissement de certificat
+```
+
+Ou directement dans un navigateur : https://pradeo0projet0portfolio.duckdns.org
+
+**Comment ça a été mis en place** : nom de domaine gratuit (DuckDNS) pointant vers l'IP publique de `app-server`, certificat Let's Encrypt généré via Certbot, renouvellement automatique déjà configuré.
+
+**Difficulté rencontrée** : après la configuration initiale, Nginx renvoyait une erreur `502 Bad Gateway` bien que le portfolio répondait correctement en local. Diagnostic via `/var/log/nginx/error.log` : `Permission denied` — un blocage SELinux, résolu avec `setsebool -P httpd_can_network_connect 1` pour autoriser Nginx à initier des connexions réseau sortantes vers d'autres ports.
+
+### 5. Scan de l'infrastructure as Code (Checkov)
+
+Analyse la configuration Terraform à la recherche d'erreurs de sécurité, avant même que l'infrastructure ne soit créée.
+
+**Résultat réel, avant/après** : 2 échecs détectés initialement sur la VM `security_server` (endpoint de métadonnées legacy actif, chiffrement en transit du disque désactivé) → **4/4 checks passés** après correction du fichier Terraform et application via `terraform apply` (modification en place, sans recréation de la VM ni interruption des services).
+
+**Tester** :
+```bash
+pip install checkov --break-system-packages
+cd terraform-oracle && checkov -d . --compact
+```
+
+### Ce qui reste à faire pour un DevSecOps complet
+
+- **SAST (analyse statique du code source)** : scanner le code lui-même avant la construction, avec un outil comme Semgrep
+- **Politique de déploiement conditionnée à la sécurité** : aujourd'hui, Trivy et Gitleaks informent sans bloquer le pipeline (`exit-code 0`) — passer à un mode strict qui empêche le déploiement en cas de vulnérabilité critique
+- **Vault en mode production** : dé-scellement manuel, stockage persistant, plutôt que le mode développement actuel
+
 ---
 
 ## Ce qui n'est pas encore fait — et ce que je referais différemment
 
-- **HTTPS** : tous les services tournent en HTTP simple. Un vrai reverse proxy Nginx avec certificats serait la première chose à ajouter pour un usage sérieux.
-- **Mots de passe par défaut** : certains services n'ont pas eu leur mot de passe changé — acceptable pour une démonstration limitée dans le temps, pas pour un usage réel.
+- **Mots de passe par défaut** sur certains services (GLPI, Grafana) — désormais centralisés dans Vault, mais pas encore changés à la source.
 - **Communication inter-serveurs par IP publique** : mes deux VM communiquent aujourd'hui via leurs adresses publiques (par simplicité), alors qu'une vraie architecture devrait privilégier le réseau privé interne (VCN), avec un bastion pour l'accès administratif.
 - **Autoscaling Kubernetes** : je démontre le maintien d'un nombre fixe de replicas, pas l'ajustement automatique à la charge (HorizontalPodAutoscaler).
-- **Pipeline CI/CD** : limité à build + test, sans scan de sécurité intégré ni déploiement automatique vers Kubernetes.
+- **Pipeline non bloquant** : Trivy et Gitleaks informent aujourd'hui sans empêcher un déploiement en cas de problème détecté.
 - **MDM sans vrai terminal connecté** : Headwind MDM est configuré et fonctionnel côté serveur, mais je n'ai pas testé l'enrôlement d'un vrai smartphone.
 - **Sauvegardes** : aucune stratégie de sauvegarde automatisée n'est en place pour les bases de données — un vrai risque si une VM tombait.
+- **SAST et Vault en mode production** : voir la section DevSecOps ci-dessus.
 
 Je considère ce projet comme une base solide, pas un point d'arrivée. Chaque limite listée ici est une prochaine chose que je veux apprendre à faire correctement.
 
@@ -276,13 +374,17 @@ Je considère ce projet comme une base solide, pas un point d'arrivée. Chaque l
 |---|---|
 | Conteneurisation | Docker |
 | Orchestration | Kubernetes (k3d/K3s) |
-| CI/CD | GitLab CI/CD |
+| CI/CD | GitLab CI/CD (build, test, scans de sécurité automatiques) |
 | Infrastructure as Code | Terraform (providers Docker et OCI) |
 | Configuration | Ansible (SSH réel et connexion Docker native) |
 | SIEM | Graylog, avec alerte de détection brute-force |
 | Supervision | Prometheus, Grafana, node-exporter |
 | EDR | osquery (détection continue) + fail2ban (réaction automatique) |
-| Scan de vulnérabilités | Trivy (manuel) |
+| Scan de vulnérabilités | Trivy (intégré au pipeline CI/CD) |
+| Détection de secrets | Gitleaks (intégré au pipeline CI/CD) |
+| Gestion des secrets | HashiCorp Vault |
+| Scan de l'infrastructure (IaC) | Checkov |
+| HTTPS | Nginx (reverse proxy) + Let's Encrypt (Certbot) + DuckDNS |
 | Gestion de parc / Ticketing | GLPI (installation native, SELinux configuré) |
 | MDM | Headwind MDM (image reconstruite pour ARM64) |
 | Versioning | Git (GitHub + GitLab) |
