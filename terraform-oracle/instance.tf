@@ -15,8 +15,17 @@ resource "oci_core_instance" "security_server" {
   }
 
   source_details {
-    source_type = "image"
-    source_id   = data.oci_core_images.ol9_images.images[0].id
+    source_type             = "image"
+    source_id               = data.oci_core_images.ol9_images.images[0].id
+    boot_volume_vpus_per_gb = 10
+  }
+
+  launch_options {
+    is_pv_encryption_in_transit_enabled = true
+  }
+
+  instance_options {
+    are_legacy_imds_endpoints_disabled = true
   }
 
   metadata = {
