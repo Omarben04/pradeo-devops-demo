@@ -50,7 +50,12 @@ trivy-scan:
 
 gitleaks-scan:
   stage: security
-  image: zricethezav/gitleaks:latest
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl git
+    - curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz -o gitleaks.tar.gz
+    - tar -xzf gitleaks.tar.gz
+    - mv gitleaks /usr/local/bin/
   script:
     - gitleaks detect --source . --verbose --exit-code 0
   allow_failure: true
