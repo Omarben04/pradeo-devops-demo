@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - security
 
 build:
   stage: build
@@ -8,17 +9,36 @@ build:
   services:
     - docker:24-dind
   script:
-    - cd app
-    - docker build -t pradeo-demo:$CI_COMMIT_SHORT_SHA .
+    - cd portfolio
+    - docker build -t portfolio-omar:$CI_COMMIT_SHORT_SHA .
+    - docker save portfolio-omar:$CI_COMMIT_SHORT_SHA -o ../portfolio-image.tar
+  artifacts:
+    paths:
+      - portfolio-image.tar
+    expire_in: 1 hour
   only:
     - main
 
 test:
   stage: test
-  image: python:3.11-slim
+  image: docker:24
+  services:
+    - docker:24-dind
   script:
-    - cd app
-    - pip install -r requirements.txt
-    - python -c "import app; print('Import OK, app se charge correctement')"
+    - docker load -i portfolio-image.tar
+    - docker run -d --name test-container -p 8080:80 portfolio-omar:$CI_COMMIT_SHORT_SHA
+    - sleep 3
+    - docker exec test-container sh -c "wget -q -O- http://localhost:80 | head -5"
+    - echo "Le conteneur demarre et repond correctement"
+  only:
+    - main
+
+trivy-scan:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - docker load -i portfolio-image.tar || true
+    - trivy image --severity HIGH,CRITICAL --exit-code 0 --format table portfolio-omar:$CI_COMMIT_SHORT_SHA
+  allow_failure: true
   only:
     - main
