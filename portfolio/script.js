@@ -285,10 +285,6 @@ const APPS = {
         <div><div class="contact-label">Email</div><div class="contact-value"><a href="mailto:omarbenmansour2004@gmail.com">omarbenmansour2004@gmail.com</a></div></div>
       </div>
       <div class="contact-row">
-        <div class="contact-icon">☎</div>
-        <div><div class="contact-label">Téléphone</div><div class="contact-value">07 45 94 51 30</div></div>
-      </div>
-      <div class="contact-row">
         <div class="contact-icon">in</div>
         <div><div class="contact-label">LinkedIn</div><div class="contact-value"><a href="https://linkedin.com/in/omarbenmansour" target="_blank" rel="noopener">linkedin.com/in/omarbenmansour</a></div></div>
       </div>
@@ -450,7 +446,7 @@ function initTerminal(winEl) {
   const files = {
     "about.txt": "Omar Benmansour — étudiant en cybersécurité & cloud (IPSSI), passionné d'infrastructure et de systèmes.",
     "skills.txt": "Linux, Windows Server, Docker, Kubernetes, Terraform, Ansible, pfSense, Wazuh, Python, Bash...",
-    "contact.txt": "omarbenmansour2004@gmail.com | 07 45 94 51 30 | github.com/Omarben04",
+    "contact.txt": "omarbenmansour2004@gmail.com | github.com/Omarben04",
   };
 
   const commands = {
