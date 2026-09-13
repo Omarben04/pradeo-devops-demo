@@ -38,6 +38,14 @@ Ce que je peux dire honnêtement : chaque brique de ce README a été **construi
 **Repos** : [GitHub](https://github.com/Omarben04/pradeo-devops-demo) (public) / [GitLab](https://gitlab.com/omar-devops/pradeo-it-demo) (privé, CI/CD)
 
 ---
+## Transparence sur les outils utilisés
+
+Ce projet a été construit avec l'aide de **Claude** (Anthropic) tout au long du parcours — pour m'accompagner dans le diagnostic des pannes, comprendre des concepts que je découvrais, et rédiger cette documentation. Je me suis aussi appuyé sur des ressources publiques pour comprendre certains sujets en amont : des chaînes YouTube orientées IT/cybersécurité, et des discussions sur des forums comme Reddit.
+
+Je le mentionne clairement parce que la transparence sur les outils utilisés me semble une vraie question de rigueur professionnelle, pas quelque chose à cacher — l'important à mes yeux n'est pas d'avoir tout écrit seul, mais d'avoir vraiment compris, testé, cassé et réparé chaque brique par moi-même.
+
+
+---
 
 ## Accès à la démonstration
 
