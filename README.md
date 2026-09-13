@@ -99,11 +99,16 @@ Le portfolio est déployé en **3 replicas**, avec un Service NodePort.
 ssh amaury@141.253.111.20 "kubectl get pods && kubectl get deployment portfolio-omar"
 ```
 
-**Test de résilience** (recrée volontairement un pod) :
+**Test du comportement natif de Kubernetes** (recrée volontairement un pod) :
 ```bash
 ssh amaury@141.253.111.20 "kubectl delete pod <nom-du-pod-portfolio> && kubectl get pods"
 ```
 → un nouveau pod apparaît automatiquement.
+
+**Point important, corrigé suite à un retour reçu** : je présentais initialement ce test comme une "preuve de résilience". En réalité, ce comportement est **natif à Kubernetes** — ce n'est pas une prouesse technique, juste son fonctionnement de base. Une vraie résilience se joue à trois niveaux que ce projet ne couvre pas :
+- **Au niveau applicatif** : mon portfolio est un site statique, donc répliquer 3 copies identiques ne pose aucune difficulté particulière. Une vraie application avec état (base de données comme Redis ou PostgreSQL) doit gérer la synchronisation entre copies et le stockage persistant (PVC) — un défi bien plus complexe que le mien.
+- **Au niveau des nœuds** : mon cluster tourne sur une seule VM. Si cette machine tombe, tout le cluster tombe avec elle. Une vraie infrastructure de production répartit les nœuds sur plusieurs machines physiques distinctes.
+- **Au niveau des dépendances** : mon cluster utilise Vault (une seule instance) pour les secrets. Si Vault tombait, ça fragiliserait tout le reste, peu importe la résilience du cluster lui-même — la chaîne est aussi solide que son maillon le plus faible.
 
 **Difficulté rencontrée** : au premier déploiement, le port n'était pas joignable depuis l'extérieur du cluster. J'ai découvert que k3d n'expose pas automatiquement des ports personnalisés — il faut le préciser explicitement à la création du cluster (`k3d cluster create -p "30081:30081@server:0"`). Ça m'a appris que "ça marche en local dans le conteneur" ne veut pas dire "c'est accessible de l'extérieur".
 
