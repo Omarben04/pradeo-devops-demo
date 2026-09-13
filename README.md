@@ -352,6 +352,35 @@ Analyse la configuration Terraform à la recherche d'erreurs de sécurité, avan
 pip install checkov --break-system-packages
 cd terraform-oracle && checkov -d . --compact
 ```
+### 6. Accès réseau privé (Tailscale) — suite à un retour reçu
+
+Un retour technique reçu sur ce projet m'a fait réaliser un vrai risque que je n'avais pas mesuré : exposer publiquement des services avec des identifiants par défaut ou faibles, même dans le cadre d'une démo sans donnée sensible, peut permettre l'exploitation d'un serveur à des fins malveillantes (botnet, rebond d'attaque) — et le titulaire du compte cloud en resterait responsable.
+
+**Action prise** : installation de Tailscale (VPN mesh gratuit) sur les deux VM et mon poste de travail, puis fermeture complète des ports publics des services sensibles, des deux côtés (pare-feu système ET règles réseau Oracle Cloud).
+
+**Résultat concret** :
+
+| Service | Avant | Après |
+|---|---|---|
+| Portfolio (HTTPS) | Public | **Reste public** (c'est voulu, c'est la démo) |
+| Graylog, Grafana, Prometheus, GLPI, Headwind MDM, Vault | Public, ports ouverts à 0.0.0.0/0 | **Accessible uniquement via Tailscale** |
+
+**Vérifier** :
+```bash
+# Le portfolio reste accessible publiquement
+curl -I https://pradeo0projet0portfolio.duckdns.org
+
+# Graylog n'est plus accessible publiquement (timeout attendu)
+curl -m 5 http://89.168.55.236:9000
+
+# Mais reste accessible via le réseau privé Tailscale
+tailscale status
+curl http://100.94.97.56:9000
+```
+
+**Difficulté rencontrée** : après avoir ajouté l'interface `tailscale0` à la zone `trusted` du pare-feu système, l'accès depuis mon Codespace restait bloqué malgré un tunnel Tailscale fonctionnel (confirmé par `tailscale ping`). La cause : Tailscale en environnement conteneurisé (Codespace) fonctionne en mode `userspace-networking`, qui nécessite de passer explicitement par un proxy SOCKS local plutôt que d'intercepter le trafic réseau nativement — résolu en démarrant `tailscaled` avec l'option `--socks5-server` et en routant les requêtes via `--socks5-hostname`.
+
+**Ce que ça m'a appris** : la vraie leçon de ce point n'est pas seulement technique — c'est qu'un projet de démonstration reste une vraie infrastructure avec de vraies responsabilités légales et de sécurité, pas un bac à sable sans conséquence.
 
 ### Ce qui reste à faire pour un DevSecOps complet
 
